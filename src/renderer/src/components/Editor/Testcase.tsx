@@ -2,12 +2,33 @@ import * as React from 'react'
 import { Checkbox } from '../ui/checkbox'
 import { Textarea } from '../ui/textarea'
 import { CheckedState } from '@radix-ui/react-checkbox'
+import { useAppDispatch } from '@/app/hooks'
+import { setTestcases } from '@/features/editor/editorSlice'
+import TestcaseOutput from './TestcaseOutput'
+
+const testcases = [
+  {
+    input: '2\n1 2',
+    output: '3'
+  },
+  {
+    input: '2\n1 2',
+    output: '3'
+  }
+]
 
 const Testcase: React.FC = () => {
-  const [isChecked, setIsChecked] = React.useState<CheckedState>(true)
+  const [testcase, setTestcase] = React.useState('')
+  const [isChecked, setIsChecked] = React.useState<CheckedState>(false)
+  const dispatch = useAppDispatch()
 
   const handleCheckboxChange = (event: CheckedState): void => {
     setIsChecked(event)
+    if (event) {
+      dispatch(setTestcases([testcase]))
+    } else {
+      dispatch(setTestcases(['3 2', '16 3', '167 82', '331 444']))
+    }
   }
 
   return (
@@ -24,6 +45,9 @@ const Testcase: React.FC = () => {
 
       {isChecked && (
         <Textarea
+          value={testcase}
+          onChange={(e) => setTestcase(e.target.value)}
+          onBlur={() => dispatch(setTestcases([testcase]))}
           className="mt-3 font-mono"
           placeholder="Enter your custom testcase here"
         ></Textarea>
@@ -31,23 +55,9 @@ const Testcase: React.FC = () => {
 
       <div>
         <h4>Sample Testcases</h4>
-        <div className="flex gap-2">
-          <div className="w-1/2">
-            <h5 style={{ marginTop: '0' }}>Input</h5>
-            <pre>
-              <code>
-                3 2 4{'\n'}
-                16
-              </code>
-            </pre>
-          </div>
-          <div className="w-1/2">
-            <h5 style={{ marginTop: '0' }}>Output</h5>
-            <pre>
-              <code>1 2{'\n'} </code>
-            </pre>
-          </div>
-        </div>
+        {testcases.map((testcase, i) => (
+          <TestcaseOutput key={i} {...testcase} />
+        ))}
       </div>
     </div>
   )

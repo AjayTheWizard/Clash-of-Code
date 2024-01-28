@@ -24,6 +24,7 @@ const LanguageSelect: React.FC<Props> = ({ language, setLanguage }) => {
         <SelectGroup>
           <SelectItem value="cpp">C++</SelectItem>
           <SelectItem value="java">Java</SelectItem>
+          <SelectItem value="python">Python</SelectItem>
           <SelectItem value="javascript">Javascript</SelectItem>
           <SelectItem value="typescript">Typescript</SelectItem>
         </SelectGroup>

@@ -1,5 +1,5 @@
 import * as monaco from 'monaco-editor'
-import theme from 'monaco-themes/themes/Dracula.json'
+// import theme from 'monaco-themes/themes/Dracula.json'
 
 type IStandaloneThemeData = monaco.editor.IStandaloneThemeData
 
