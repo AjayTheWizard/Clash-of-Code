@@ -1,23 +1,23 @@
 import React from 'react'
 
 type Props = {
-  input: string
-  output: string
+  sample: string
+  result: string
 }
 
 const TestcaseOutput: React.FC<Props> = (props) => {
   return (
     <div className="flex justify-stretch gap-2">
       <div className="w-1/2 flex flex-col">
-        <h5 style={{ marginTop: '0' }}>Input</h5>
+        <h5 style={{ marginTop: '0' }}>Sample Output</h5>
         <pre className="h-full">
-          <code>{props.input}</code>
+          <code>{props.sample}</code>
         </pre>
       </div>
       <div className="w-1/2 flex flex-col">
-        <h5 style={{ marginTop: '0' }}>Output</h5>
+        <h5 style={{ marginTop: '0' }}>Your Output</h5>
         <pre className="h-full">
-          <code>{props.output}</code>
+          <code>{props.result}</code>
         </pre>
       </div>
     </div>

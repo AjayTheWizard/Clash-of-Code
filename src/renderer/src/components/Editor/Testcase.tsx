@@ -2,24 +2,14 @@ import * as React from 'react'
 import { Checkbox } from '../ui/checkbox'
 import { Textarea } from '../ui/textarea'
 import { CheckedState } from '@radix-ui/react-checkbox'
-import { useAppDispatch } from '@/app/hooks'
+import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { setTestcases } from '@/features/editor/editorSlice'
 import TestcaseOutput from './TestcaseOutput'
-
-const testcases = [
-  {
-    input: '2\n1 2',
-    output: '3'
-  },
-  {
-    input: '2\n1 2',
-    output: '3'
-  }
-]
 
 const Testcase: React.FC = () => {
   const [testcase, setTestcase] = React.useState('')
   const [isChecked, setIsChecked] = React.useState<CheckedState>(false)
+  const output = useAppSelector((state) => state.editor.output)
   const dispatch = useAppDispatch()
 
   const handleCheckboxChange = (event: CheckedState): void => {
@@ -32,7 +22,7 @@ const Testcase: React.FC = () => {
   }
 
   return (
-    <div className="p-2 pt-4 markdown-body overflow-y-auto h-full">
+    <div className="p-4 pt-6 markdown-body overflow-y-auto h-full">
       <div className="flex items-center space-x-2">
         <Checkbox id="custom-testcase" onCheckedChange={handleCheckboxChange} />
         <label
@@ -54,11 +44,20 @@ const Testcase: React.FC = () => {
       )}
 
       <div>
-        <h4>Sample Testcases</h4>
-        {testcases.map((testcase, i) => (
-          <TestcaseOutput key={i} {...testcase} />
-        ))}
+        <h4>Compiler Message</h4>
+        <pre>
+          <code>Compiling...</code>
+        </pre>
       </div>
+
+      {output.length > 0 && (
+        <div>
+          <h4>Sample Testcases</h4>
+          {output.map((testcase, i) => (
+            <TestcaseOutput key={i} {...testcase} />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

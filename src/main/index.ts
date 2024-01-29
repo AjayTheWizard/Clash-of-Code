@@ -10,7 +10,7 @@ import './lib/ipc/execute-code'
 let loadURL: ReturnType<typeof serve>
 
 if (!is.dev) {
-  loadURL = serve({ directory: 'out/renderer', scheme: 'ccp' })
+  loadURL = serve({ directory: 'out/renderer', scheme: 'coc' })
 }
 
 async function createWindow(): Promise<void> {
@@ -80,3 +80,6 @@ app.on('window-all-closed', () => {
 
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
+
+// Registering protocol
+app.setAsDefaultProtocolClient('coc', process.execPath, [...process.argv])

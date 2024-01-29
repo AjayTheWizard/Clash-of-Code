@@ -1,10 +1,10 @@
-import * as React from 'react'
+import React, { Suspense } from 'react'
 import { Outlet, createBrowserRouter } from 'react-router-dom'
 
 // Pages
 import Root from '@/pages/Root'
 import Error from '@/pages/Errors/Error'
-import { Suspense } from 'react'
+import LoadingProgress from '@/components/LoadingProgress'
 
 const router = createBrowserRouter([
   {
@@ -14,7 +14,7 @@ const router = createBrowserRouter([
   {
     path: '/start',
     element: (
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<LoadingProgress />}>
         <Outlet />
       </Suspense>
     ),

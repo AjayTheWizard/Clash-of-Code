@@ -15,6 +15,19 @@ type Props = {
 }
 
 const LanguageSelect: React.FC<Props> = ({ language, setLanguage }) => {
+  // Load the saved language from localStorage when the component mounts
+  React.useEffect(() => {
+    const savedLanguage = localStorage.getItem('language')
+    if (savedLanguage) {
+      setLanguage(savedLanguage)
+    }
+  }, [])
+
+  // Save the selected language to localStorage whenever it changes
+  React.useEffect(() => {
+    localStorage.setItem('language', language)
+  }, [language])
+
   return (
     <Select value={language} onValueChange={setLanguage}>
       <SelectTrigger className="w-[180px]">
