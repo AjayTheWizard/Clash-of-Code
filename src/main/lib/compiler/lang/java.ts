@@ -1,10 +1,12 @@
 import fs from 'fs'
 import { exec } from 'child_process'
-import { options as default_options } from '..'
-import type { Options } from '../lang/cpp'
+import { options as default_options, pLimit } from '..'
 import { basename, dirname } from 'path'
 
-export async function compile(code: string, options: Options): Promise<string[]> {
+import type { Options } from '../lang/cpp'
+import type { ExecutionResult } from '../../../../shared/types/code'
+
+export async function compile(code: string, options: Options): Promise<ExecutionResult[]> {
   const dir = `${default_options.outDir}/${options.fileName}`
   const path = `${dir}/Main.java`
   const out = `${dir}/Main.class`
@@ -25,8 +27,11 @@ export async function compile(code: string, options: Options): Promise<string[]>
     console.log(`Code compiled successfully`)
   }
 
+  // Create a concurrency limiter with a limit of 3
+  const limit = pLimit(3)
+
   // Map each testcase to a promise that resolves to the result of executing the code with that testcase
-  const promises = options.testcases.map((testcase) => executeJavaCode(testcase, out))
+  const promises = options.testcases.map((testcase) => limit(() => executeJavaCode(testcase, out)))
 
   // Wait for all promises to resolve
   const results = await Promise.all(promises)
@@ -52,19 +57,26 @@ function compileJavaCode(path: string): Promise<string> {
   })
 }
 
-function executeJavaCode(input: string, path: string = 'code.class'): Promise<string> {
+function executeJavaCode(input: string, path: string): Promise<ExecutionResult> {
   return new Promise((resolve, reject) => {
+    const start = new Date()
+    let errMsg = ''
     const child = exec(
       `cd ${dirname(path)} & java "${basename(path).replace('.class', '')}"`,
       (error, stdout, stderr) => {
         if (
           (error && error.toString().indexOf('Error: stdout maxBuffer exceeded.') != -1) ||
-          stderr
+          stderr ||
+          stdout.length > 1_00_000
         ) {
-          reject(new Error(`Execution error: ${error?.message}\n${stderr}`))
-        } else {
-          resolve(stdout)
+          errMsg = 'Error: stdout maxBuffer exceeded. You might have initialized an infinite loop.'
         }
+
+        resolve({
+          output: stdout,
+          error: errMsg,
+          timing: new Date().getTime() - start.getTime()
+        })
       }
     )
 

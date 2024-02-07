@@ -5,6 +5,7 @@ import { Outlet, createBrowserRouter } from 'react-router-dom'
 import Root from '@/pages/Root'
 import Error from '@/pages/Errors/Error'
 import LoadingProgress from '@/components/LoadingProgress'
+import { SocketProvider } from '@/context/SocketContext'
 
 const router = createBrowserRouter([
   {
@@ -12,16 +13,34 @@ const router = createBrowserRouter([
     element: <Root />
   },
   {
-    path: '/start',
+    path: '/',
     element: (
       <Suspense fallback={<LoadingProgress />}>
-        <Outlet />
+        <SocketProvider>
+          <Outlet />
+        </SocketProvider>
       </Suspense>
     ),
     children: [
       {
-        path: '/start',
+        path: 'coding',
         Component: React.lazy(() => import('@/pages/Coding'))
+      },
+      {
+        path: 'create',
+        Component: React.lazy(() => import('@/pages/Create'))
+      },
+      {
+        path: 'join',
+        Component: React.lazy(() => import('@/pages/Join'))
+      },
+      {
+        path: 'results',
+        Component: React.lazy(() => import('@/pages/Results'))
+      },
+      {
+        path: 'start',
+        Component: React.lazy(() => import('@/pages/Start'))
       }
     ]
   },

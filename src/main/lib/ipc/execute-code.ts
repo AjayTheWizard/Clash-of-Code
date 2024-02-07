@@ -1,9 +1,8 @@
 import { ipcMain as ipc } from 'electron'
 import { init, cpp, java, python, javascript, typescript } from '../compiler'
+import { ExecutionResult, SupportedLanguages } from '../../../shared/types/code'
 
 init({ stats: true })
-
-type SupportedLanguages = 'cpp' | 'java' | 'python' | 'javascript' | 'typescript'
 
 interface ExecuteCodeEvent {
   language: SupportedLanguages
@@ -15,7 +14,7 @@ async function executeCode(
   code: string,
   testcase: string[],
   language: SupportedLanguages
-): Promise<string[]> {
+): Promise<ExecutionResult[]> {
   if (language === 'cpp') {
     return cpp.compile(code, {
       fileName: 'cppmain',
@@ -51,10 +50,9 @@ async function executeCode(
     })
   }
 
-  return [language]
+  return []
 }
 
 ipc.handle('execute-code', async (_event, args: ExecuteCodeEvent) => {
-  const result = await executeCode(args.code, args.testcases, args.language)
-  return result
+  return await executeCode(args.code, args.testcases, args.language)
 })

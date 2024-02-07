@@ -8,28 +8,21 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
+import { SupportedLanguages } from 'src/shared/types/code'
 
 type Props = {
-  language: string
-  setLanguage: React.Dispatch<React.SetStateAction<string>>
+  language: SupportedLanguages
+  onLanguageChange: (language: SupportedLanguages) => void
 }
 
-const LanguageSelect: React.FC<Props> = ({ language, setLanguage }) => {
-  // Load the saved language from localStorage when the component mounts
-  React.useEffect(() => {
-    const savedLanguage = localStorage.getItem('language')
-    if (savedLanguage) {
-      setLanguage(savedLanguage)
-    }
-  }, [])
-
+const LanguageSelect: React.FC<Props> = ({ language, onLanguageChange }) => {
   // Save the selected language to localStorage whenever it changes
   React.useEffect(() => {
     localStorage.setItem('language', language)
   }, [language])
 
   return (
-    <Select value={language} onValueChange={setLanguage}>
+    <Select value={language} onValueChange={onLanguageChange}>
       <SelectTrigger className="w-[180px]">
         <SelectValue placeholder="Select a Language" />
       </SelectTrigger>

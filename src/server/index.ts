@@ -1,20 +1,14 @@
 import express from 'express'
 import http from 'http'
-import cors from 'cors'
 
 import { Server } from 'socket.io'
 import { connectUser } from './socket/user'
 
 const app = express()
 
-// Middlewares
-app.use(cors({ origin: '*' }))
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
-
 // Socket.io
 const server = http.createServer(app)
-const io = new Server(server, {
+export const io = new Server(server, {
   cors: {
     origin: '*'
   }
@@ -28,9 +22,15 @@ io.on('connection', (socket) => {
 })
 
 // Routes
-
 app.get('/', (_req, res) => {
-  res.send('<h1>Hello world</h1>')
+  res.send('Server is running!')
+})
+
+app.post('/login', (req, res) => {
+  const { username, password } = req.body
+
+  console.log(username, password)
+  res.send('Logged in!')
 })
 
 server.listen(3000, () => {

@@ -5,7 +5,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
 import '../server'
-import './lib/ipc/execute-code'
+import './lib/ipc'
 
 let loadURL: ReturnType<typeof serve>
 
@@ -60,6 +60,9 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
+  createWindow()
+  createWindow()
+  createWindow()
   createWindow()
 
   app.on('activate', function () {

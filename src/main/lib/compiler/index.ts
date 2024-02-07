@@ -1,4 +1,10 @@
 import fs from 'fs'
+import p from 'p-limit'
+
+export let pLimit: typeof p = null!
+;(async (): Promise<void> => {
+  pLimit = (await import('p-limit')).default
+})()
 
 export type CompilerOptions = {
   stats: boolean

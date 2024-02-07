@@ -12,8 +12,10 @@ import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
 import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
 import theme from 'monaco-themes/themes/Merbivore Soft.json'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
-import { setOutput } from '@/features/editor/editorSlice'
+import { setCode, setOutput } from '@/features/editor/editorSlice'
 import EditorSettings from './EditorSettings'
+import { useEditor } from '@/context/EditorContext'
+import { useNavigate } from 'react-router-dom'
 
 self.MonacoEnvironment = {
   getWorker(_, label): Worker | Promise<Worker> {
@@ -50,17 +52,20 @@ const default_options: monaco.editor.IStandaloneEditorConstructionOptions = {
 type Editor = monaco.editor.IStandaloneCodeEditor
 
 function CodeEditor(): JSX.Element {
-  const [language, setLanguage] = React.useState(localStorage.language)
   const [isLoading, setIsLoading] = React.useState(false)
+  const { language, mode, setEditorOptions } = useEditor()
 
   const editorRef = React.useRef<Editor>(null)
   const testcases = useAppSelector((state) => state.editor.testcases)
   const settings = useAppSelector((state) => state.editor.settings)
+  const question = useAppSelector((state) => state.editor.question)
+  const navigator = useNavigate()
 
   const [options, setOptions] =
     React.useState<monaco.editor.IStandaloneEditorConstructionOptions>(default_options)
 
   const dispatch = useAppDispatch()
+  console.log(mode)
 
   React.useEffect(() => {
     setOptions((prev) => ({
@@ -81,13 +86,60 @@ function CodeEditor(): JSX.Element {
 
   async function runCode(): Promise<void> {
     const code = editorRef.current?.getValue()
+    console.log('sample', code)
 
     dispatch(setOutput([]))
+    dispatch(setCode(code!))
+    if (mode === 'hidden') setEditorOptions({ mode: 'sample' })
     setIsLoading(true)
 
     window.api
       .execute({ code, testcases, language })
-      .then((data) => dispatch(setOutput(data.map((item) => ({ result: item, sample: item })))))
+      .then((data) =>
+        dispatch(
+          setOutput(
+            data.map((item, index) => ({
+              result: item.output,
+              sample: question.sample_io[index].output
+            }))
+          )
+        )
+      )
+      .catch((err) => alert(err))
+      .finally(() => setIsLoading(false))
+  }
+
+  async function customTestcaseCode(): Promise<void> {
+    const code = editorRef.current?.getValue() || ''
+    console.log('custom', code)
+
+    dispatch(setOutput([]))
+    dispatch(setCode(code!))
+    if (mode === 'hidden') setEditorOptions({ mode: 'sample' })
+    setIsLoading(true)
+
+    window.api
+      .executeCustom({
+        solution: {
+          code: question.solution[0].code,
+          language: question.solution[0].language
+        },
+        user_answer: {
+          code: code,
+          language: localStorage.language
+        },
+        testcases: testcases
+      })
+      .then((data) =>
+        dispatch(
+          setOutput(
+            data.user_output.map((item, index) => ({
+              result: item,
+              sample: data.sample_output[index]
+            }))
+          )
+        )
+      )
       .catch((err) => alert(err))
       .finally(() => setIsLoading(false))
   }
@@ -95,8 +147,26 @@ function CodeEditor(): JSX.Element {
   return (
     <div className="h-full flex flex-col">
       <div className="px-4 p-2 flex items-center">
-        <LanguageSelect language={language} setLanguage={setLanguage} />
-        <Button size="sm" className="ml-auto mr-2" onClick={runCode} disabled={isLoading}>
+        <LanguageSelect
+          language={language}
+          onLanguageChange={(language) => setEditorOptions({ language })}
+        />
+
+        <Button
+          size="sm"
+          variant="outline"
+          className="ml-auto mr-2"
+          onClick={() => navigator('/results')}
+        >
+          Leave Test
+        </Button>
+
+        <Button
+          size="sm"
+          className="mr-2"
+          onClick={() => (mode === 'sample' ? runCode() : customTestcaseCode())}
+          disabled={isLoading}
+        >
           {isLoading ? <ReloadIcon className="animate-spin mr-2" /> : <PlayIcon className="mr-2" />}
           Run
         </Button>

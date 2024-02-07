@@ -1,9 +1,10 @@
 import fs from 'fs'
 import { exec } from 'child_process'
-import { options as default_options } from '..'
+import { options as default_options, pLimit } from '..'
 import type { Options } from '../lang/cpp'
+import type { ExecutionResult } from '../../../../shared/types/code'
 
-export async function compile(code: string, options: Options): Promise<string[]> {
+export async function compile(code: string, options: Options): Promise<ExecutionResult[]> {
   const filename = options.fileName
   const path = `${default_options.outDir}/${filename}.ts`
 
@@ -13,8 +14,13 @@ export async function compile(code: string, options: Options): Promise<string[]>
     console.log(`Code saved to ${path}`)
   }
 
+  // Create a concurrency limiter with a limit of 3
+  const limit = pLimit(3)
+
   // Map each testcase to a promise that resolves to the result of executing the code with that testcase
-  const promises = options.testcases.map((testcase) => executeTypescriptCode(testcase, path))
+  const promises = options.testcases.map((testcase) =>
+    limit(() => executeTypescriptCode(testcase, path))
+  )
 
   // Wait for all promises to resolve
   const results = await Promise.all(promises)
@@ -26,7 +32,10 @@ export async function compile(code: string, options: Options): Promise<string[]>
   return results
 }
 
-function executeTypescriptCode(input: string, path: string): Promise<string> {
+function executeTypescriptCode(input: string, path: string): Promise<ExecutionResult> {
+  const start = new Date()
+  let errMsg = ''
+
   return new Promise((resolve, reject) => {
     const child = exec(`ts-node "${path}"`, (error, stdout, stderr) => {
       if (
@@ -34,16 +43,18 @@ function executeTypescriptCode(input: string, path: string): Promise<string> {
         stdout.length > 1_00_000
       ) {
         killTypescriptCode()
-        return reject(
-          'Error: stdout maxBuffer exceeded. You might have initialized an infinite loop.'
-        )
+        errMsg = 'Error: stdout maxBuffer exceeded. You might have initialized an infinite loop.'
       }
 
       if (stderr) {
         return reject(stderr)
       }
 
-      resolve(stdout)
+      resolve({
+        output: stdout,
+        error: errMsg,
+        timing: new Date().getTime() - start.getTime()
+      })
     })
 
     // Set a timeout for the execution

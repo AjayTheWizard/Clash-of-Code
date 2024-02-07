@@ -1,8 +1,8 @@
 import React from 'react'
 
 type Props = {
-  sample: string
-  result: string
+  input: string
+  output: string
 }
 
 const TestcaseOutput: React.FC<Props> = (props) => {
@@ -11,13 +11,13 @@ const TestcaseOutput: React.FC<Props> = (props) => {
       <div className="w-1/2 flex flex-col">
         <h5 style={{ marginTop: '0' }}>Sample Output</h5>
         <pre className="h-full">
-          <code>{props.sample}</code>
+          <code>{props.input}</code>
         </pre>
       </div>
       <div className="w-1/2 flex flex-col">
         <h5 style={{ marginTop: '0' }}>Your Output</h5>
         <pre className="h-full">
-          <code>{props.result}</code>
+          <code>{props.output}</code>
         </pre>
       </div>
     </div>
