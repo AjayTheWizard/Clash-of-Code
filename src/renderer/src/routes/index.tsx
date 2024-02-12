@@ -13,6 +13,20 @@ const router = createBrowserRouter([
     element: <Root />
   },
   {
+    path: '/auth',
+    element: (
+      <Suspense fallback={<LoadingProgress />}>
+        <Outlet />
+      </Suspense>
+    ),
+    children: [
+      {
+        path: 'login',
+        Component: React.lazy(() => import('@/pages/Login'))
+      }
+    ]
+  },
+  {
     path: '/',
     element: (
       <Suspense fallback={<LoadingProgress />}>

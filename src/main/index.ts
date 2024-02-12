@@ -16,7 +16,7 @@ if (!is.dev) {
 async function createWindow(): Promise<void> {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
+    width: 960,
     height: 670,
     show: false,
     autoHideMenuBar: true,
@@ -60,9 +60,6 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  createWindow()
-  createWindow()
-  createWindow()
   createWindow()
 
   app.on('activate', function () {
